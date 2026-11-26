@@ -18,3 +18,8 @@ class RunInfo(BaseModel):
     status: RunStatus
     settings: dict
     decision: str | None
+    current: bool | None = None
+    is_current: bool | None = None
+    active: bool | None = None
+    is_active: bool | None = None
+    released: bool | None = None

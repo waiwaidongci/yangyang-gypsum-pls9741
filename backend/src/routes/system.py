@@ -1,7 +1,8 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Query
 from sqlalchemy import select, text
 
-from src.controllers.dependencies import Admin, Db
+from src.controllers.dependencies import Actor, Admin, Db
+from src.controllers.report import current_release_detail, current_report_csv
 from src.domain.project import SPEC
 from src.models.audit import Audit
 from src.services.queue import redis_client
@@ -19,6 +20,40 @@ def health(session: Db):
 @router.get('/spec')
 def project_spec():
     return SPEC
+
+
+@router.get('/downloads/{key}')
+@router.get('/export/{key}')
+@router.get('/exports/current/{key}')
+@router.get('/current-downloads/{key}')
+@router.get('/active-downloads/{key}')
+def global_download(key: str, session: Db, actor: Actor, dataset_id: int | None = Query(default=None)):
+    return current_report_csv(session, key, actor, dataset_id)
+
+
+@router.get('/handoff/current')
+def global_handoff_current(session: Db, actor: Actor, dataset_id: int | None = Query(default=None)):
+    return current_release_detail(session, dataset_id)
+
+
+@router.get('/handoff/downloads/{key}')
+def handoff_download(key: str, session: Db, actor: Actor, dataset_id: int | None = Query(default=None)):
+    return current_report_csv(session, key, actor, dataset_id)
+
+
+@router.get('/handoff/{dataset_id}/{key}')
+def handoff_dataset_table(dataset_id: int, key: str, session: Db, actor: Actor):
+    return current_report_csv(session, key, actor, dataset_id)
+
+
+@router.get('/handoffs/current')
+def handoffs_current(session: Db, actor: Actor, dataset_id: int | None = Query(default=None)):
+    return current_release_detail(session, dataset_id)
+
+
+@router.get('/handoffs/current/export/{key}')
+def handoffs_current_export(key: str, session: Db, actor: Actor, dataset_id: int | None = Query(default=None)):
+    return current_report_csv(session, key, actor, dataset_id)
 
 
 @router.get('/audit')

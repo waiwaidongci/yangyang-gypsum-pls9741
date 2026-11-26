@@ -79,18 +79,23 @@ def calibration_tables(path: PLSPath, count: int) -> list[dict]:
 
 def handoff_tables(summary: list[dict], holdout: list[dict], pending: list[dict], count: int) -> list[dict]:
     trace_labels = {"id": "试条编号", "batch_id": "制板批号", "predicted_mpa": "估计抗折（MPa）",
+                    "lower_bound_mpa": "预测区间下限（MPa）",
+                    "upper_bound_mpa": "预测区间上限（MPa）",
                     "outside_features": "超出训练范围的字段"}
     scores = {f"score_{index}": f"潜变量 {index} 得分" for index in range(1, count + 1)}
     return [
         table("pending_estimates", "待测试条及实测优先顺序", {
             "position": "交接顺序", **trace_labels, "priority": "实测优先级（1最高）", "action": "实测安排", **scores,
         }, pending),
-        table("holdout_errors", "独立批抗折误差", {
+        table("holdout_errors", "独立批误差与区间覆盖", {
             "scope": "汇总层级", "batch_id": "留出制板批", "strips": "试条数", "rmse_mpa": "RMSE（MPa）",
             "mae_mpa": "MAE（MPa）", "bias_mpa": "平均估计偏差（MPa）",
             "baseline_rmse_mpa": "训练均值基线 RMSE（MPa）", "outside_strips": "读数越界条数",
+            "interval_half_width_mpa": "区间半宽（MPa）", "covered_strips": "区间覆盖条数",
+            "coverage_rate": "区间覆盖率（0–1）", "coverage_pct": "区间覆盖率（%）",
         }, summary),
         table("holdout_predictions", "独立批逐条抗折对照", {
-            **trace_labels, "actual_mpa": "实测抗折（MPa）", "error_mpa": "估计减实测（MPa）", **scores,
+            **trace_labels, "actual_mpa": "实测抗折（MPa）", "error_mpa": "估计减实测（MPa）",
+            "covered": "实测落在区间内", **scores,
         }, holdout),
     ]

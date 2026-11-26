@@ -34,6 +34,7 @@ docker compose exec -T backend python -m scripts.seed_demo
 | 查看校准 | `GET /api/runs/{id}` | 等待 `completed`，在 `result` 中读摘要、指标及各表 |
 | 质量复核 | `POST /api/runs/{id}/review` | `decision` 为 `approved` 或 `rejected`，`note` 为复核意见 |
 | 下载表 | `GET /api/runs/{id}/export/{key}` | 复核批准后可下载，`key` 对应结果表标识 |
+| 当前交接下载 | `GET /api/datasets/{dataset_id}/downloads/{key}` | 同一事务内随最新批准切换；校准失败或未批准时仍指向上一版 |
 
 可在项目根生成完整的可重导演示 CSV。文件包含已测和待测分区，待测抗折一列为空。
 
